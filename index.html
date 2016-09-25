@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Test Autocomplete Page</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta charset="utf-8">
+	<link href="bootstrap.min.css" rel="stylesheet" media="screen">
+	<link href="jquery-ui.css" rel="stylesheet" media="screen">
+	<style>
+			.myautocomplete{width:30%!important;min-width: 300px!important;}
+	</style>
+</head>
+<body>
+
+
+	<script src="jquery-2.1.3.min.js"></script>
+	<script src="jquery-ui.js"></script>
+	<script src="textarea-caret-position.js"></script>
+	<script type="text/javascript">
+
+		$( function() {
+		var Names = [
+			"Kevin Durant",
+			"Lebron James",
+			"Kobe Bryant",
+			"Tracy McGrady",
+			"Stephen Curry",
+			"Vince Carter",
+			"Chris Paul",
+			"Blake Griffin",
+			"Ming Yao",
+			"Paul George",
+			"Carmelo Anthony",
+			"James Harden",
+			"Klay Thompson",
+			"Kyrie Irving",
+			"Dirk Nowitzki",
+			"Dwyane Wade"
+		];
+
+		var xPercentage=0;
+		var yPercentage=20;
+
+		function split( val ) {
+			return val.split( /,\s*/ );
+		}
+		function extractLast( term ) {
+			return split( term ).pop();
+		}
+
+		$( "#txt" ).autocomplete({
+				minLength: 1,
+				source: function( request, response ) {
+					// only use the last one as current
+					response( $.ui.autocomplete.filter(
+					Names, extractLast( request.term ) ) );
+				},
+				focus: function() {
+					return false;
+				},
+			    _resizeMenu: function() {
+					var ul = this.menu.element;
+			        ul.outerWidth(this.element.outerWidth());
+    			},
+				select: function( event, ui ) {
+					var terms = split( this.value );
+					// remove the current input
+					terms.pop();
+
+					//selected
+					terms.push( ui.item.value );
+					terms.push( "" );
+
+					this.value = terms.join( ", " );
+
+					var elem = document.getElementById("txt");
+					//console.log(elem)
+					var rect = elem.getBoundingClientRect();
+					//console.log(rect)
+					var lineheight = parseInt($('#txt').css('line-height'));
+					//console.log(lineheight);
+					var yscroll = elem.scrollTop;
+					//it may scroll so calcualte this.
+					var coordinates = getCaretCoordinates(elem, elem.selectionEnd, { debug: false });
+						//console.log(coordinates);
+					xPercentage = Math.round((100*coordinates.left)/rect.width);
+					yPercentage = Math.round((100*coordinates.top+100*lineheight-100*yscroll)/rect.height);
+
+					//console.log(xPercentage)
+					//console.log(yPercentage);
+					$( "#txt" ).autocomplete( "option", "position", { my : "left top", at: "left+"+xPercentage+"% top+"+yPercentage+"%" , collision: "fit" } );
+
+					return false;
+				}
+
+			});
+			$( "#txt" ).autocomplete("widget").addClass("myautocomplete");
+			//this is used for only first time to init
+			$( "#txt" ).autocomplete( "option", "position", { my : "left top", at: "left+"+xPercentage+"% top+"+yPercentage+"%", collision: "fit" } );
+		} );
+		
+	</script>
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-8">
+				<p class="text-muted">try autocomplete</p>
+				<form>
+					<div class="form-group">
+						<label for="txt">Type in NBA Stars</label>
+						<textarea id="txt" class="form-control" cols="10" rows="5"></textarea>						
+					</div>
+
+				</form>				
+			</div>
+		</div>
+	</div>
+
+	<script src="bootstrap.min.js"></script>
+</body>
+</html>
